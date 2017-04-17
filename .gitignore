@@ -12,3 +12,4 @@
 hs_err_pid*
 /.idea/
 /eth-propeller-web3j.iml
+/target/
