@@ -16,10 +16,12 @@ import org.web3j.utils.Numeric;
 public class EthereumRpc implements EthereumBackend {
     private final Web3JFacade web3JFacade;
     private final EthereumRpcEventGenerator ethereumRpcEventGenerator;
+    private final ChainId chainId;
 
-    public EthereumRpc(Web3JFacade web3JFacade, EthereumRpcEventGenerator ethereumRpcEventGenerator) {
+    public EthereumRpc(Web3JFacade web3JFacade, EthereumRpcEventGenerator ethereumRpcEventGenerator, ChainId chainId) {
         this.web3JFacade = web3JFacade;
         this.ethereumRpcEventGenerator = ethereumRpcEventGenerator;
+        this.chainId = chainId;
     }
 
     @Override
@@ -39,15 +41,11 @@ public class EthereumRpc implements EthereumBackend {
 
     @Override
     public EthHash submit(EthAccount account, EthAddress address, EthValue value, EthData data, Nonce nonce, GasUsage gasLimit) {
-        RawTransaction tx = createTransaction(account, nonce, getGasPrice(), gasLimit, address, value, data);
-        EthData signedMessage = EthData.of(TransactionEncoder.signMessage(tx, Credentials.create(Numeric.toHexStringNoPrefix(account.getBigIntPrivateKey()))));
+        RawTransaction tx = web3JFacade.createTransaction(nonce, getGasPrice(), gasLimit, address, value, data);
+        EthData signedMessage = EthData.of(TransactionEncoder.signMessage(tx, (byte)chainId.id, Credentials.create(Numeric.toHexStringNoPrefix(account.getBigIntPrivateKey()))));
         web3JFacade.sendTransaction(signedMessage);
 
         return EthHash.of(Crypto.sha3(signedMessage).data);
-    }
-
-    private RawTransaction createTransaction(EthAccount account, Nonce nonce, GasPrice gasPrice, GasUsage gasLimit, EthAddress address, EthValue value, EthData data) {
-        return web3JFacade.createTransaction(nonce, gasPrice, gasLimit, address, value, data);
     }
 
     @Override
