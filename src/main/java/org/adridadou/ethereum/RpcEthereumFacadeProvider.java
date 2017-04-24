@@ -2,6 +2,7 @@ package org.adridadou.ethereum;
 
 import org.adridadou.ethereum.propeller.CoreEthereumFacadeProvider;
 import org.adridadou.ethereum.propeller.EthereumFacade;
+import org.adridadou.ethereum.propeller.event.EthereumEventHandler;
 import org.adridadou.ethereum.propeller.values.ChainId;
 import org.adridadou.ethereum.rpc.EthereumRpc;
 import org.adridadou.ethereum.rpc.EthereumRpcEventGenerator;
@@ -19,13 +20,16 @@ public class RpcEthereumFacadeProvider {
     public static final ChainId MAIN_CHAIN_ID = ChainId.id(0);
     public static final ChainId ROPSTEN_CHAIN_ID = ChainId.id(3);
     public static final ChainId ETHER_CAMP_CHAIN_ID = ChainId.id(161);
+    public static final ChainId KOVAN_CHAIN_ID = ChainId.id(42);
 
     private RpcEthereumFacadeProvider() {}
 
     public static EthereumFacade forRemoteNode(final String url, final ChainId chainId) {
         Web3JFacade web3j = new Web3JFacade(Web3j.build(new HttpService(url)));
         EthereumRpc ethRpc = new EthereumRpc(web3j, new EthereumRpcEventGenerator(web3j), chainId);
-        return CoreEthereumFacadeProvider.create(ethRpc);
+        EthereumEventHandler eventHandler = new EthereumEventHandler();
+        eventHandler.onReady();
+        return CoreEthereumFacadeProvider.create(ethRpc, eventHandler);
     }
 
     public static InfuraBuilder forInfura(final InfuraKey key)  {
@@ -45,6 +49,10 @@ public class RpcEthereumFacadeProvider {
 
         public EthereumFacade createRopsten() {
             return forRemoteNode("https://ropsten.infura.io/" + key.key, RpcEthereumFacadeProvider.ROPSTEN_CHAIN_ID);
+        }
+
+        public EthereumFacade createKovan() {
+            return forRemoteNode("https://kovan.infura.io/" + key.key, RpcEthereumFacadeProvider.KOVAN_CHAIN_ID);
         }
     }
 }

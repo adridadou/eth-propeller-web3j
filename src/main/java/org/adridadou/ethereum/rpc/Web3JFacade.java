@@ -5,7 +5,7 @@ import org.adridadou.ethereum.propeller.values.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.RawTransaction;
+import org.web3j.protocol.core.methods.request.*;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.utils.Numeric;
@@ -103,17 +103,6 @@ public class Web3JFacade {
         }
     }
 
-    /*
-    public <T> Observable<T> event(final EthAddress address,final String eventName, final CallTransaction.Contract contract, Class<T> cls) {
-        return web3j.ethLogObservable(new EthFilter(DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST,address.withLeading0x()))
-                .map(log -> {
-                    LogInfo logInfo = new LogInfo(address.address, new ArrayList<>(), EthData.of(log.getData()).data);
-                    return contract.parseEvent(logInfo);
-                }).filter(invocation -> eventName.equals(invocation.function.name))
-                .map(invocation -> outputTypeHandler.convertSpecificType(invocation.args, cls));
-    }
-    */
-
     public long getCurrentBlockNumber() {
         try {
             return web3j.ethBlockNumber().send().getBlockNumber().longValue();
@@ -123,7 +112,7 @@ public class Web3JFacade {
     }
 
     public RawTransaction createTransaction(Nonce nonce, GasPrice gasPrice, GasUsage gasLimit, EthAddress address, EthValue value, EthData data) {
-        return RawTransaction.createTransaction(nonce.getValue(), gasPrice.getPrice(), gasLimit.getUsage(), address.withLeading0x(), value.inWei(), data.withLeading0x());
+        return RawTransaction.createTransaction(nonce.getValue(), gasPrice.getPrice(), gasLimit.getUsage(), address.toString(), value.inWei(), data.toString());
     }
 
     public TransactionReceipt getReceipt(EthHash hash) {
