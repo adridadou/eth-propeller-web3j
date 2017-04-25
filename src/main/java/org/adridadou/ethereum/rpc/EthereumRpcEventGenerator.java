@@ -20,9 +20,13 @@ public class EthereumRpcEventGenerator {
     private final List<EthereumEventHandler> ethereumEventHandlers = new ArrayList<>();
     private final Web3JFacade web3JFacade;
 
-    public EthereumRpcEventGenerator(Web3JFacade web3JFacade) {
+    public EthereumRpcEventGenerator(Web3JFacade web3JFacade, EthereumRpcConfig config) {
         this.web3JFacade = web3JFacade;
-        web3JFacade.observeBlocks().subscribe(this::observeBlocks);
+        if(config.isPollBlocks()) {
+            web3JFacade.observeBlocksPolling(config.getPollingFrequence()).subscribe(this::observeBlocks);
+        }else {
+            web3JFacade.observeBlocks().subscribe(this::observeBlocks);
+        }
     }
 
     private void observeBlocks(EthBlock ethBlock) {

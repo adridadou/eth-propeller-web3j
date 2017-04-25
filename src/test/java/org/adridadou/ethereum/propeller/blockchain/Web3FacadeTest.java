@@ -1,4 +1,4 @@
-package org.adridadou.ethereum.blockchain;
+package org.adridadou.ethereum.propeller.blockchain;
 
 import org.adridadou.ethereum.propeller.values.EthAddress;
 import org.adridadou.ethereum.rpc.Web3JFacade;

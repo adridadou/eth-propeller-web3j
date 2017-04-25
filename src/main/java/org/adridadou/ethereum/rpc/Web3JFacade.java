@@ -14,6 +14,7 @@ import rx.Observable;
 import java.io.IOError;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by davidroon on 19.11.16.
@@ -22,6 +23,8 @@ import java.math.BigInteger;
 public class Web3JFacade {
     public static final BigInteger GAS_LIMIT_FOR_CONSTANT_CALLS = BigInteger.valueOf(1_000_000_000);
     private final Web3j web3j;
+    private BigInteger lastBlockNumber = BigInteger.ZERO;
+    private final Web3jBlockHandler blockEventHandler = new Web3jBlockHandler();
 
     public Web3JFacade(final Web3j web3j) {
         this.web3j = web3j;
@@ -53,6 +56,24 @@ public class Web3JFacade {
 
     public Observable<EthBlock> observeBlocks() {
         return web3j.blockObservable(true);
+    }
+
+    public Observable<EthBlock> observeBlocksPolling(long pollingFrequence) {
+        CompletableFuture.runAsync(() -> {
+            while(true) {
+                try {
+                    BigInteger currentBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
+                    if(!currentBlockNumber.equals(this.lastBlockNumber)) {
+                        this.lastBlockNumber = currentBlockNumber;
+                        blockEventHandler.newElement(web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, true).send());
+                    }
+                    Thread.sleep(pollingFrequence);
+                } catch (InterruptedException  | IOException e) {
+                    throw new EthereumApiException("error while polling blocks", e);
+                }
+            }
+        });
+        return blockEventHandler.observable;
     }
 
     public BigInteger estimateGas(EthAccount account, EthAddress address, EthValue value, EthData data) {
