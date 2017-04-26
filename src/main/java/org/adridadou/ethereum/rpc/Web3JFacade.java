@@ -3,7 +3,6 @@ package org.adridadou.ethereum.rpc;
 import org.adridadou.ethereum.propeller.exception.EthereumApiException;
 import org.adridadou.ethereum.propeller.values.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.Response;
@@ -23,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
  * This code is released under Apache 2 license
  */
 public class Web3JFacade {
-    public static final BigInteger GAS_LIMIT_FOR_CONSTANT_CALLS = BigInteger.valueOf(1_000_000_000);
+    private static final BigInteger GAS_LIMIT_FOR_CONSTANT_CALLS = BigInteger.valueOf(1_000_000_000);
     private final Web3j web3j;
     private BigInteger lastBlockNumber = BigInteger.ZERO;
     private final Web3jBlockHandler blockEventHandler = new Web3jBlockHandler();
@@ -32,7 +31,7 @@ public class Web3JFacade {
         this.web3j = web3j;
     }
 
-    public EthData constantCall(final EthAccount account, final EthAddress address, final EthData data) {
+    EthData constantCall(final EthAccount account, final EthAddress address, final EthData data) {
         try {
             return EthData.of(handleError(web3j.ethCall(new Transaction(
                     account.getAddress().withLeading0x(),
@@ -48,7 +47,7 @@ public class Web3JFacade {
         }
     }
 
-    public BigInteger getTransactionCount(EthAddress address) {
+    BigInteger getTransactionCount(EthAddress address) {
         try {
             return Numeric.decodeQuantity(handleError(web3j.ethGetTransactionCount(address.withLeading0x(), DefaultBlockParameterName.LATEST).send()));
         } catch (IOException e) {
@@ -56,11 +55,11 @@ public class Web3JFacade {
         }
     }
 
-    public Observable<EthBlock> observeBlocks() {
+    Observable<EthBlock> observeBlocks() {
         return web3j.blockObservable(true);
     }
 
-    public Observable<EthBlock> observeBlocksPolling(long pollingFrequence) {
+    Observable<EthBlock> observeBlocksPolling(long pollingFrequence) {
         CompletableFuture.runAsync(() -> {
             while(true) {
                 try {
@@ -78,7 +77,7 @@ public class Web3JFacade {
         return blockEventHandler.observable;
     }
 
-    public BigInteger estimateGas(EthAccount account, EthAddress address, EthValue value, EthData data) {
+    BigInteger estimateGas(EthAccount account, EthAddress address, EthValue value, EthData data) {
         try {
             return Numeric.decodeQuantity(handleError(web3j.ethEstimateGas(new Transaction(account.getAddress().withLeading0x(), null, null, null,
             		address.isEmpty() ? null : address.withLeading0x(), value.inWei(),  data.toString())).send()));
@@ -87,7 +86,7 @@ public class Web3JFacade {
         }
     }
 
-    public BigInteger getGasPrice() {
+    BigInteger getGasPrice() {
         try {
             return Numeric.decodeQuantity(handleError(web3j.ethGasPrice().send()));
         } catch (IOException e) {
@@ -95,7 +94,7 @@ public class Web3JFacade {
         }
     }
 
-    public EthHash sendTransaction(final EthData rawTransaction) {
+    EthHash sendTransaction(final EthData rawTransaction) {
         try {
             return EthHash.of(handleError(web3j.ethSendRawTransaction(rawTransaction.withLeading0x()).send()));
         } catch (IOException e) {
@@ -118,7 +117,7 @@ public class Web3JFacade {
         return response.getResult();
     }
 
-    public SmartContractByteCode getCode(EthAddress address) {
+    SmartContractByteCode getCode(EthAddress address) {
         try {
             return SmartContractByteCode.of(web3j.ethGetCode(address.withLeading0x(), DefaultBlockParameterName.LATEST).send().getCode());
         } catch (IOException e) {
@@ -126,7 +125,7 @@ public class Web3JFacade {
         }
     }
 
-    public long getCurrentBlockNumber() {
+    long getCurrentBlockNumber() {
         try {
             return web3j.ethBlockNumber().send().getBlockNumber().longValue();
         } catch (IOException e) {
@@ -134,11 +133,11 @@ public class Web3JFacade {
         }
     }
 
-    public RawTransaction createTransaction(Nonce nonce, GasPrice gasPrice, GasUsage gasLimit, EthAddress address, EthValue value, EthData data) {
+    RawTransaction createTransaction(Nonce nonce, GasPrice gasPrice, GasUsage gasLimit, EthAddress address, EthValue value, EthData data) {
         return RawTransaction.createTransaction(nonce.getValue(), gasPrice.getPrice(), gasLimit.getUsage(), address.toString(), value.inWei(), data.toString());
     }
 
-    public TransactionReceipt getReceipt(EthHash hash) {
+    TransactionReceipt getReceipt(EthHash hash) {
         try {
             return handleError(web3j.ethGetTransactionReceipt(hash.withLeading0x()).send());
         } catch (IOException e) {
@@ -146,7 +145,7 @@ public class Web3JFacade {
         }
     }
 
-    public EthBlock getBlock(long blockNumber) {
+    EthBlock getBlock(long blockNumber) {
         try {
             return web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(BigInteger.valueOf(blockNumber)),true).send();
         } catch (IOException e) {
@@ -154,7 +153,7 @@ public class Web3JFacade {
         }
     }
 
-    public EthBlock getBlock(EthHash blockHash) {
+    EthBlock getBlock(EthHash blockHash) {
         try {
             return web3j.ethGetBlockByHash(blockHash.withLeading0x(),true).send();
         } catch (IOException e) {

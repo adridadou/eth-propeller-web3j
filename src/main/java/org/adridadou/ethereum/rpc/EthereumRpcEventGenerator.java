@@ -1,10 +1,7 @@
 package org.adridadou.ethereum.rpc;
 
 import org.adridadou.ethereum.propeller.event.*;
-import org.adridadou.ethereum.propeller.values.EthData;
-import org.adridadou.ethereum.propeller.values.EventInfo;
 import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
