@@ -27,7 +27,7 @@ public class RpcEthereumFacadeProvider {
 
     public static EthereumFacade forRemoteNode(final String url, final ChainId chainId, EthereumRpcConfig config) {
         Web3JFacade web3j = new Web3JFacade(Web3j.build(new HttpService(url)));
-        EthereumRpc ethRpc = new EthereumRpc(web3j, new EthereumRpcEventGenerator(web3j, config), chainId);
+        EthereumRpc ethRpc = new EthereumRpc(web3j, chainId, config);
         EthereumEventHandler eventHandler = new EthereumEventHandler();
         eventHandler.onReady();
         return CoreEthereumFacadeProvider.create(ethRpc, eventHandler, config);

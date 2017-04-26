@@ -3,7 +3,9 @@ package org.adridadou.ethereum.rpc;
 import org.adridadou.ethereum.propeller.exception.EthereumApiException;
 import org.adridadou.ethereum.propeller.values.*;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.*;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -141,6 +143,22 @@ public class Web3JFacade {
             return handleError(web3j.ethGetTransactionReceipt(hash.withLeading0x()).send());
         } catch (IOException e) {
             throw new EthereumApiException("error while retrieving the transactionReceipt", e);
+        }
+    }
+
+    public EthBlock getBlock(long blockNumber) {
+        try {
+            return web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(BigInteger.valueOf(blockNumber)),true).send();
+        } catch (IOException e) {
+            throw new EthereumApiException("error while retrieving the block " + blockNumber, e);
+        }
+    }
+
+    public EthBlock getBlock(EthHash blockHash) {
+        try {
+            return web3j.ethGetBlockByHash(blockHash.withLeading0x(),true).send();
+        } catch (IOException e) {
+            throw new EthereumApiException("error while retrieving the block " + blockHash.withLeading0x(), e);
         }
     }
 }
