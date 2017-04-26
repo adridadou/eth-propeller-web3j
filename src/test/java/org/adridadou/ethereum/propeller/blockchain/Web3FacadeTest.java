@@ -24,7 +24,7 @@ public class Web3FacadeTest {
     private final EthAddress address = EthAddress.of("0x00394857372832");
 
     @Test
-    public void test_getBalance() throws IOException {
+    public void testGetBalance() throws IOException {
         Request req = mock(Request.class);
         EthGetBalance response = mock(EthGetBalance.class);
         when(req.send()).thenReturn(response);
