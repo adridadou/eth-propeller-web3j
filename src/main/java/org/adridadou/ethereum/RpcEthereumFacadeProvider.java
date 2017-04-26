@@ -6,7 +6,6 @@ import org.adridadou.ethereum.propeller.event.EthereumEventHandler;
 import org.adridadou.ethereum.propeller.values.ChainId;
 import org.adridadou.ethereum.rpc.EthereumRpc;
 import org.adridadou.ethereum.rpc.EthereumRpcConfig;
-import org.adridadou.ethereum.rpc.EthereumRpcEventGenerator;
 import org.adridadou.ethereum.rpc.Web3JFacade;
 import org.adridadou.ethereum.values.config.InfuraKey;
 import org.web3j.protocol.Web3j;
