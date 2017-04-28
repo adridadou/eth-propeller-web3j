@@ -4,7 +4,6 @@ import org.adridadou.ethereum.propeller.event.*;
 import org.web3j.protocol.core.methods.response.EthBlock;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +30,7 @@ public class EthereumRpcEventGenerator {
         ethereumEventHandlers
                 .forEach(handler -> param.receipts
                         .stream().map(tx -> new TransactionInfo(tx, TransactionStatus.Executed))
-                        .forEach(tx -> handler.onTransactionExecuted(tx, Collections.emptyList())));
+                        .forEach(handler::onTransactionExecuted));
     }
 
     public void addListener(EthereumEventHandler ethereumEventHandler) {
