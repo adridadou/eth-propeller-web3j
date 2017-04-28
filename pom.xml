@@ -12,8 +12,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/{github-user}/{github-repo}.git</connection>
-        <developerConnection>scm:git:git@github.com:adridadou/eth-contract-api.git</developerConnection>
-        <url>https://github.com/adridadou/eth-contract-api</url>
+        <developerConnection>scm:git:git@github.com:adridadou/eth-propeller-web3j.git</developerConnection>
+        <url>https://github.com/adridadou/eth-propeller-core</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -21,7 +21,7 @@
         <repository>
             <id>bintray</id>
             <name>Cubefriendly maven repo</name>
-            <url>https://api.bintray.com/maven/cubefriendly/maven/eth-contract-api</url>
+            <url>https://api.bintray.com/maven/cubefriendly/maven/eth-propeller-web3j</url>
         </repository>
     </distributionManagement>
 
