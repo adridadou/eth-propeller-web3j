@@ -12,7 +12,8 @@ public class EthereumRpcConfig extends EthereumConfig {
     private final boolean pollBlocks;
     private final long pollingFrequence;
 
-    public EthereumRpcConfig(boolean pollBlocks, long pollingFrequence) {
+    public EthereumRpcConfig(boolean pollBlocks, long pollingFrequence, String swarmUrl, long blockWait) {
+        super(swarmUrl, blockWait);
         this.pollBlocks = pollBlocks;
         this.pollingFrequence = pollingFrequence;
     }
@@ -29,7 +30,7 @@ public class EthereumRpcConfig extends EthereumConfig {
         return new Builder();
     }
 
-    public static class Builder {
+    public static class Builder extends EthereumConfig.Builder {
         private boolean pollBlocks;
         private long pollingFrequence = 100;
 
@@ -49,7 +50,7 @@ public class EthereumRpcConfig extends EthereumConfig {
         }
 
         public EthereumRpcConfig build() {
-            return new EthereumRpcConfig(pollBlocks, pollingFrequence);
+            return new EthereumRpcConfig(pollBlocks, pollingFrequence, swarmUrl, blockWaitLimit);
         }
     }
 }
