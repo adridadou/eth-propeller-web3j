@@ -125,8 +125,9 @@ public class EthereumRpc implements EthereumBackend {
     }
 
     private EventInfo toEventInfo(Log log) {
-        EthData eventSignature = EthData.of(log.getTopics().get(0));
+        List<EthData> topics = log.getTopics().stream().map(EthData::of).collect(Collectors.toList());
+        EthData eventSignature = topics.get(0);
         EthData eventArguments = EthData.of(log.getData());
-        return new EventInfo(eventSignature, eventArguments);
+        return new EventInfo(eventSignature, eventArguments, topics.subList(1, topics.size()));
     }
 }
