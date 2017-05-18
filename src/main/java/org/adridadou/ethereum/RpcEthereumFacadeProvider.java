@@ -21,6 +21,7 @@ public class RpcEthereumFacadeProvider {
     public static final ChainId ROPSTEN_CHAIN_ID = ChainId.id(3);
     public static final ChainId ETHER_CAMP_CHAIN_ID = ChainId.id(161);
     public static final ChainId KOVAN_CHAIN_ID = ChainId.id(42);
+    public static final ChainId RINKEBY_CHAIN_ID = ChainId.id(4);
 
     private RpcEthereumFacadeProvider() {}
 
@@ -55,6 +56,10 @@ public class RpcEthereumFacadeProvider {
 
         public EthereumFacade createKovan() {
             return forRemoteNode("https://kovan.infura.io/" + key.key, RpcEthereumFacadeProvider.KOVAN_CHAIN_ID, config);
+        }
+
+        public EthereumFacade createRinkeby() {
+            return forRemoteNode("https://rinkeby.infura.io/" + key.key, RpcEthereumFacadeProvider.RINKEBY_CHAIN_ID, config);
         }
     }
 }
