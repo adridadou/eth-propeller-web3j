@@ -56,5 +56,9 @@ public class RpcEthereumFacadeProvider {
         public EthereumFacade createKovan() {
             return forRemoteNode("https://kovan.infura.io/" + key.key, RpcEthereumFacadeProvider.KOVAN_CHAIN_ID, config);
         }
+
+        public EthereumFacade createRinkeby() {
+            return forRemoteNode("https://rinkeby.infura.io/" + key.key, RpcEthereumFacadeProvider.KOVAN_CHAIN_ID, config);
+        }
     }
 }
