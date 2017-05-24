@@ -4,7 +4,7 @@
 
     <groupId>org.adridadou</groupId>
     <artifactId>eth-propeller-web3j</artifactId>
-    <version>0.6</version>
+    <version>0.7</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,6 +37,12 @@
         </repository>
 
         <repository>
+            <id>Adridadou</id>
+            <name>Repository from Bintray for Adridadou</name>
+            <url>http://dl.bintray.com/cubefriendly/maven</url>
+        </repository>
+
+        <repository>
             <id>oss.jfrog.org2</id>
             <name>Repository from Bintray</name>
             <url>http://oss.jfrog.org/oss-snapshot-local</url>
@@ -54,7 +60,7 @@
         <dependency>
             <groupId>org.adridadou</groupId>
             <artifactId>eth-propeller-core</artifactId>
-            <version>0.6</version>
+            <version>0.7</version>
         </dependency>
 
         <dependency>

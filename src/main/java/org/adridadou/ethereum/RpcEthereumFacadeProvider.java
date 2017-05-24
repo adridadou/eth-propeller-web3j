@@ -47,7 +47,7 @@ public class RpcEthereumFacadeProvider {
         }
 
         public EthereumFacade createMain() {
-            return forRemoteNode("https://main.infura.io/" + key.key, RpcEthereumFacadeProvider.MAIN_CHAIN_ID, config);
+            return forRemoteNode("https://mainnet.infura.io/" + key.key, RpcEthereumFacadeProvider.MAIN_CHAIN_ID, config);
         }
 
         public EthereumFacade createRopsten() {
