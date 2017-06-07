@@ -4,15 +4,17 @@ import org.adridadou.ethereum.propeller.Crypto;
 import org.adridadou.ethereum.propeller.EthereumBackend;
 import org.adridadou.ethereum.propeller.event.*;
 import org.adridadou.ethereum.propeller.values.*;
+import org.adridadou.ethereum.propeller.values.TransactionReceipt;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.core.methods.request.RawTransaction;
-import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.protocol.core.methods.response.*;
 import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -94,6 +96,17 @@ public class EthereumRpc implements EthereumBackend {
         ethereumRpcEventGenerator.addListener(eventHandler);
     }
 
+    @Override
+    public TransactionInfo getTransactionInfo(EthHash hash) {
+        return Optional.ofNullable(web3JFacade.getReceipt(hash)).flatMap(web3jReceipt -> Optional.ofNullable(web3JFacade.getTransaction(hash))
+                .map(transaction -> {
+                    TransactionReceipt receipt = toReceipt(transaction.getGas(), web3jReceipt);
+                    TransactionStatus status = transaction.getBlockHash().isEmpty() ? TransactionStatus.Unknown : TransactionStatus.Executed;
+                    return new TransactionInfo(hash, receipt, status);
+                })
+        ).orElseGet(() -> new TransactionInfo(hash,null, TransactionStatus.Unknown));
+    }
+
     BlockInfo toBlockInfo(EthBlock ethBlock) {
         EthBlock.Block block = ethBlock.getBlock();
 
@@ -105,16 +118,16 @@ public class EthereumRpc implements EthereumBackend {
                 .collect(Collectors.toMap(org.web3j.protocol.core.methods.response.TransactionReceipt::getTransactionHash, e -> e));
 
         List<TransactionReceipt> receiptList = receipts.entrySet().stream()
-                .map(entry -> toReceipt(txObjects.get(entry.getKey()), entry.getValue())).collect(Collectors.toList());
+                .map(entry -> toReceipt(txObjects.get(entry.getKey()).getGas(), entry.getValue())).collect(Collectors.toList());
 
         return new BlockInfo(block.getNumber().longValue(), receiptList);
     }
 
-    private TransactionReceipt toReceipt(EthBlock.TransactionObject txObject, org.web3j.protocol.core.methods.response.TransactionReceipt tx) {
-        boolean successful = !tx.getGasUsed().equals(txObject.getGas());
+    private TransactionReceipt toReceipt(BigInteger gasLimit, org.web3j.protocol.core.methods.response.TransactionReceipt tx) {
+        boolean successful = !tx.getGasUsed().equals(gasLimit);
         String error = "";
         if(!successful) {
-            error = "All the gas was used! an error occurred here";
+            error = "All the gas was used! an error occurred";
         }
 
         return new TransactionReceipt(EthHash.of(tx.getTransactionHash()), EthAddress.of(tx.getFrom()),EthAddress.of(tx.getTo()), EthAddress.of(tx.getContractAddress()), error, EthData.empty(), successful, toEventInfos(tx.getLogs()));

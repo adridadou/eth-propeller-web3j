@@ -9,6 +9,7 @@ import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.*;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Numeric;
 import rx.Observable;
 
@@ -140,6 +141,14 @@ public class Web3JFacade {
     TransactionReceipt getReceipt(EthHash hash) {
         try {
             return handleError(web3j.ethGetTransactionReceipt(hash.withLeading0x()).send());
+        } catch (IOException e) {
+            throw new EthereumApiException("error while retrieving the transactionReceipt", e);
+        }
+    }
+
+    org.web3j.protocol.core.methods.response.Transaction getTransaction(EthHash hash) {
+        try {
+            return handleError(web3j.ethGetTransactionByHash(hash.withLeading0x()).send());
         } catch (IOException e) {
             throw new EthereumApiException("error while retrieving the transactionReceipt", e);
         }

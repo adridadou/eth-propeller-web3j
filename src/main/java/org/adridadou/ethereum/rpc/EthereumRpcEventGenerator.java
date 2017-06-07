@@ -1,6 +1,8 @@
 package org.adridadou.ethereum.rpc;
 
 import org.adridadou.ethereum.propeller.event.*;
+import org.adridadou.ethereum.propeller.values.TransactionInfo;
+import org.adridadou.ethereum.propeller.values.TransactionStatus;
 import org.web3j.protocol.core.methods.response.EthBlock;
 
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class EthereumRpcEventGenerator {
 
         ethereumEventHandlers
                 .forEach(handler -> param.receipts
-                        .stream().map(tx -> new TransactionInfo(tx, TransactionStatus.Executed))
+                        .stream().map(tx -> new TransactionInfo(tx.hash, tx, TransactionStatus.Executed))
                         .forEach(handler::onTransactionExecuted));
     }
 
