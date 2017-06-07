@@ -12,7 +12,7 @@ public class EthereumRpcConfig extends EthereumConfig {
     private final boolean pollBlocks;
     private final long pollingFrequence;
 
-    public EthereumRpcConfig(boolean pollBlocks, long pollingFrequence, String swarmUrl, long blockWait) {
+    private EthereumRpcConfig(boolean pollBlocks, long pollingFrequence, String swarmUrl, long blockWait) {
         super(swarmUrl, blockWait);
         this.pollBlocks = pollBlocks;
         this.pollingFrequence = pollingFrequence;
