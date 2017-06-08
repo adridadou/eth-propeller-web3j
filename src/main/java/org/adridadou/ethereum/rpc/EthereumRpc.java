@@ -130,17 +130,17 @@ public class EthereumRpc implements EthereumBackend {
             error = "All the gas was used! an error occurred";
         }
 
-        return new TransactionReceipt(EthHash.of(tx.getTransactionHash()), EthAddress.of(tx.getFrom()),EthAddress.of(tx.getTo()), EthAddress.of(tx.getContractAddress()), error, EthData.empty(), successful, toEventInfos(tx.getLogs()));
+        return new TransactionReceipt(EthHash.of(tx.getTransactionHash()), EthAddress.of(tx.getFrom()),EthAddress.of(tx.getTo()), EthAddress.of(tx.getContractAddress()), error, EthData.empty(), successful, toEventInfos(EthHash.of(tx.getTransactionHash()), tx.getLogs()));
     }
 
-    private List<EventInfo> toEventInfos(List<Log> logs) {
-        return logs.stream().map(this::toEventInfo).collect(Collectors.toList());
+    private List<EventData> toEventInfos(EthHash transactionHash, List<Log> logs) {
+        return logs.stream().map(log -> this.toEventInfo(transactionHash, log)).collect(Collectors.toList());
     }
 
-    private EventInfo toEventInfo(Log log) {
+    private EventData toEventInfo(EthHash transactionHash, Log log) {
         List<EthData> topics = log.getTopics().stream().map(EthData::of).collect(Collectors.toList());
         EthData eventSignature = topics.get(0);
         EthData eventArguments = EthData.of(log.getData());
-        return new EventInfo(eventSignature, eventArguments, topics.subList(1, topics.size()));
+        return new EventData(transactionHash, eventSignature, eventArguments, topics.subList(1, topics.size()));
     }
 }
