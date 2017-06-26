@@ -130,7 +130,7 @@ public class EthereumRpc implements EthereumBackend {
             error = "All the gas was used! an error occurred";
         }
 
-        return new TransactionReceipt(EthHash.of(tx.getTransactionHash()), EthAddress.of(tx.getFrom()),EthAddress.of(tx.getTo()), EthAddress.of(tx.getContractAddress()), error, EthData.empty(), successful, toEventInfos(EthHash.of(tx.getTransactionHash()), tx.getLogs()));
+        return new TransactionReceipt(EthHash.of(tx.getTransactionHash()), EthHash.of(tx.getBlockHash()), EthAddress.of(tx.getFrom()),EthAddress.of(tx.getTo()), EthAddress.of(tx.getContractAddress()), error, EthData.empty(), successful, toEventInfos(EthHash.of(tx.getTransactionHash()), tx.getLogs()));
     }
 
     private List<EventData> toEventInfos(EthHash transactionHash, List<Log> logs) {
