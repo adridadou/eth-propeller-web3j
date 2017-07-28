@@ -48,9 +48,9 @@ public class EthereumRpc implements EthereumBackend {
     }
 
     @Override
-    public EthHash submit(EthAccount account, EthAddress address, EthValue value, EthData data, Nonce nonce, GasUsage gasLimit) {
-        RawTransaction tx = web3JFacade.createTransaction(nonce, getGasPrice(), gasLimit, address, value, data);
-        EthData signedMessage = EthData.of(TransactionEncoder.signMessage(tx, (byte)chainId.id, Credentials.create(Numeric.toHexStringNoPrefix(account.getBigIntPrivateKey()))));
+    public EthHash submit(TransactionRequest request, Nonce nonce) {
+        RawTransaction tx = web3JFacade.createTransaction(nonce, getGasPrice(), request.getGasLimit(), request.getAddress(), request.getValue(), request.getData());
+        EthData signedMessage = EthData.of(TransactionEncoder.signMessage(tx, (byte)chainId.id, Credentials.create(Numeric.toHexStringNoPrefix(request.getAccount().getBigIntPrivateKey()))));
         web3JFacade.sendTransaction(signedMessage);
 
         return EthHash.of(Crypto.sha3(signedMessage).data);
@@ -97,14 +97,14 @@ public class EthereumRpc implements EthereumBackend {
     }
 
     @Override
-    public TransactionInfo getTransactionInfo(EthHash hash) {
+    public Optional<TransactionInfo> getTransactionInfo(EthHash hash) {
         return Optional.ofNullable(web3JFacade.getReceipt(hash)).flatMap(web3jReceipt -> Optional.ofNullable(web3JFacade.getTransaction(hash))
-                .map(transaction -> {
-                    TransactionReceipt receipt = toReceipt(transaction.getGas(), web3jReceipt);
-                    TransactionStatus status = transaction.getBlockHash().isEmpty() ? TransactionStatus.Unknown : TransactionStatus.Executed;
-                    return new TransactionInfo(hash, receipt, status);
-                })
-        ).orElseGet(() -> new TransactionInfo(hash,null, TransactionStatus.Unknown));
+            .map(transaction -> {
+                TransactionReceipt receipt = toReceipt(transaction.getGas(), web3jReceipt);
+                TransactionStatus status = transaction.getBlockHash().isEmpty() ? TransactionStatus.Unknown : TransactionStatus.Executed;
+                return new TransactionInfo(hash, receipt, status);
+            })
+        );
     }
 
     BlockInfo toBlockInfo(EthBlock ethBlock) {
