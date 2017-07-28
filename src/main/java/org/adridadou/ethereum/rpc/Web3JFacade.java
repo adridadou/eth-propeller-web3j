@@ -16,7 +16,7 @@ import rx.Observable;
 import java.io.IOError;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 /**
  * Created by davidroon on 19.11.16.
@@ -61,7 +61,7 @@ public class Web3JFacade {
     }
 
     Observable<EthBlock> observeBlocksPolling(long pollingFrequence) {
-        CompletableFuture.runAsync(() -> {
+        Executors.newCachedThreadPool().submit(() -> {
             while(true) {
                 try {
                     BigInteger currentBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
