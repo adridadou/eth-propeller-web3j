@@ -1,22 +1,31 @@
 package org.adridadou.ethereum.rpc;
 
-import org.adridadou.ethereum.propeller.exception.EthereumApiException;
-import org.adridadou.ethereum.propeller.values.*;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.*;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Numeric;
-import rx.Observable;
-
 import java.io.IOError;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.Executors;
+
+import org.adridadou.ethereum.propeller.exception.EthereumApiException;
+import org.adridadou.ethereum.propeller.values.EthAccount;
+import org.adridadou.ethereum.propeller.values.EthAddress;
+import org.adridadou.ethereum.propeller.values.EthData;
+import org.adridadou.ethereum.propeller.values.EthHash;
+import org.adridadou.ethereum.propeller.values.EthValue;
+import org.adridadou.ethereum.propeller.values.GasPrice;
+import org.adridadou.ethereum.propeller.values.GasUsage;
+import org.adridadou.ethereum.propeller.values.Nonce;
+import org.adridadou.ethereum.propeller.values.SmartContractByteCode;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.RawTransaction;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.utils.Numeric;
+import rx.Observable;
 
 /**
  * Created by davidroon on 19.11.16.
@@ -66,11 +75,17 @@ public class Web3JFacade {
                 try {
                     BigInteger currentBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
                     if(!currentBlockNumber.equals(this.lastBlockNumber)) {
+                        if (!lastBlockNumber.equals(BigInteger.ZERO) && !currentBlockNumber.subtract(lastBlockNumber).equals(BigInteger.ONE)) {
+                            //TODO Block was skipped, what if one of our tx was there? Panic?
+                        }
                         this.lastBlockNumber = currentBlockNumber;
                         blockEventHandler.newElement(web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, true).send());
                     }
                     Thread.sleep(pollingFrequence);
                 } catch (InterruptedException  | IOException e) {
+                    //TODO InterruptedException connection sucks but please go on.
+                    //Once I've experienced OnErrorNotImplementedException here too
+                    //Any throw will stop polling forever
                     throw new EthereumApiException("error while polling blocks", e);
                 }
             }
