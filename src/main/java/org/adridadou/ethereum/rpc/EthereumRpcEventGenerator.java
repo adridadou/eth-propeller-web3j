@@ -26,6 +26,7 @@ public class EthereumRpcEventGenerator {
     }
 
     private void observeBlocks(EthBlock ethBlock) {
+        ethereumEventHandlers.forEach(EthereumEventHandler::onReady);
         BlockInfo param = ethereum.toBlockInfo(ethBlock);
         ethereumEventHandlers.forEach(handler -> handler.onBlock(param));
 

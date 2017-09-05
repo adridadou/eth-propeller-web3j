@@ -30,8 +30,7 @@ public class RpcEthereumFacadeProvider {
 		Web3JFacade web3j = new Web3JFacade(w3j);
         EthereumRpc ethRpc = new EthereumRpc(web3j, chainId, config);
         EthereumEventHandler eventHandler = new EthereumEventHandler();
-        w3j.blockObservable(false).take(1).subscribe(b->eventHandler.onReady());
-        
+
         return CoreEthereumFacadeProvider.create(ethRpc, eventHandler, config);
     }
 
