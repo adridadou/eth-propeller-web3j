@@ -25,6 +25,10 @@ public class RpcEthereumFacadeProvider {
 
     private RpcEthereumFacadeProvider() {}
 
+    public static EthereumFacade forRemoteNode(final String url, final ChainId chainId) {
+        return forRemoteNode(url, chainId, EthereumRpcConfig.builder().build());
+    }
+
     public static EthereumFacade forRemoteNode(final String url, final ChainId chainId, EthereumRpcConfig config) {
         Web3j w3j = Web3j.build(new HttpService(url));
 		Web3JFacade web3j = new Web3JFacade(w3j);
@@ -32,6 +36,10 @@ public class RpcEthereumFacadeProvider {
         EthereumEventHandler eventHandler = new EthereumEventHandler();
 
         return CoreEthereumFacadeProvider.create(ethRpc, eventHandler, config);
+    }
+
+    public static InfuraBuilder forInfura(final InfuraKey key)  {
+        return new InfuraBuilder(key, EthereumRpcConfig.builder().build());
     }
 
     public static InfuraBuilder forInfura(final InfuraKey key, EthereumRpcConfig config)  {

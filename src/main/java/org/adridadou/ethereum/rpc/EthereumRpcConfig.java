@@ -26,7 +26,7 @@ public class EthereumRpcConfig extends EthereumConfig {
         return pollingFrequence;
     }
 
-    public static Builder config() {
+    public static Builder builder() {
         return new Builder();
     }
 

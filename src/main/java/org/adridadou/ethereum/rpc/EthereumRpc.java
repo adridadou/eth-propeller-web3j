@@ -34,7 +34,7 @@ public class EthereumRpc implements EthereumBackend {
 
     @Override
     public GasPrice getGasPrice() {
-        return new GasPrice(web3JFacade.getGasPrice());
+        return web3JFacade.getGasPrice();
     }
 
     @Override
