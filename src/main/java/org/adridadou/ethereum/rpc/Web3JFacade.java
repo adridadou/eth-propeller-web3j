@@ -15,10 +15,10 @@ import org.adridadou.ethereum.propeller.values.GasPrice;
 import org.adridadou.ethereum.propeller.values.GasUsage;
 import org.adridadou.ethereum.propeller.values.Nonce;
 import org.adridadou.ethereum.propeller.values.SmartContractByteCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.*;
 import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -33,6 +33,7 @@ import rx.Observable;
  */
 public class Web3JFacade {
     private static final BigInteger GAS_LIMIT_FOR_CONSTANT_CALLS = BigInteger.valueOf(1_000_000_000);
+    private static final Logger logger = LoggerFactory.getLogger(Web3JFacade.class);
     private final Web3j web3j;
     private BigInteger lastBlockNumber = BigInteger.ZERO;
     private final Web3jBlockHandler blockEventHandler = new Web3jBlockHandler();
@@ -74,19 +75,14 @@ public class Web3JFacade {
             while(true) {
                 try {
                     BigInteger currentBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
-                    if(!currentBlockNumber.equals(this.lastBlockNumber)) {
-                        if (!lastBlockNumber.equals(BigInteger.ZERO) && !currentBlockNumber.subtract(lastBlockNumber).equals(BigInteger.ONE)) {
-                            //TODO Block was skipped, what if one of our tx was there? Panic?
-                        }
+                    while(this.lastBlockNumber.equals(BigInteger.ZERO) || currentBlockNumber.compareTo(this.lastBlockNumber) < 0) {
+                        EthBlock currentBlock = web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(this.lastBlockNumber.add(BigInteger.ONE)), true).send();
                         this.lastBlockNumber = currentBlockNumber;
-                        blockEventHandler.newElement(web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, true).send());
+                        blockEventHandler.newElement(currentBlock);
                     }
                     Thread.sleep(pollingFrequence);
                 } catch (InterruptedException  | IOException e) {
-                    //TODO InterruptedException connection sucks but please go on.
-                    //Once I've experienced OnErrorNotImplementedException here too
-                    //Any throw will stop polling forever
-                    throw new EthereumApiException("error while polling blocks", e);
+                    logger.warn("error while polling blocks", e);
                 }
             }
         });
@@ -102,9 +98,9 @@ public class Web3JFacade {
         }
     }
 
-    BigInteger getGasPrice() {
+    GasPrice getGasPrice() {
         try {
-            return Numeric.decodeQuantity(handleError(web3j.ethGasPrice().send()));
+            return new GasPrice(EthValue.wei(Numeric.decodeQuantity(handleError(web3j.ethGasPrice().send()))));
         } catch (IOException e) {
             throw new IOError(e);
         }
@@ -150,7 +146,7 @@ public class Web3JFacade {
     }
 
     RawTransaction createTransaction(Nonce nonce, GasPrice gasPrice, GasUsage gasLimit, EthAddress address, EthValue value, EthData data) {
-        return RawTransaction.createTransaction(nonce.getValue(), gasPrice.getPrice(), gasLimit.getUsage(), address.toString(), value.inWei(), data.toString());
+        return RawTransaction.createTransaction(nonce.getValue(), gasPrice.getPrice().inWei(), gasLimit.getUsage(), address.toString(), value.inWei(), data.toString());
     }
 
     TransactionReceipt getReceipt(EthHash hash) {
