@@ -3,8 +3,11 @@ package org.adridadou.ethereum.rpc;
 import org.adridadou.ethereum.propeller.Crypto;
 import org.adridadou.ethereum.propeller.EthereumBackend;
 import org.adridadou.ethereum.propeller.event.*;
+import org.adridadou.ethereum.propeller.exception.EthereumApiException;
 import org.adridadou.ethereum.propeller.values.*;
 import org.adridadou.ethereum.propeller.values.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.core.methods.request.RawTransaction;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
  * This code is released under Apache 2 license
  */
 public class EthereumRpc implements EthereumBackend {
+    private static final Logger logger = LoggerFactory.getLogger(EthereumRpc.class);
+
     private final Web3JFacade web3JFacade;
     private final EthereumRpcEventGenerator ethereumRpcEventGenerator;
     private final ChainId chainId;
@@ -109,18 +114,23 @@ public class EthereumRpc implements EthereumBackend {
 
     BlockInfo toBlockInfo(EthBlock ethBlock) {
         EthBlock.Block block = ethBlock.getBlock();
+        try {
+            Map<String, EthBlock.TransactionObject> txObjects = block.getTransactions().stream()
+                    .map(tx -> (EthBlock.TransactionObject)tx.get()).collect(Collectors.toMap(EthBlock.TransactionObject::getHash, e -> e));
 
-        Map<String, EthBlock.TransactionObject> txObjects = block.getTransactions().stream()
-                .map(tx -> (EthBlock.TransactionObject)tx.get()).collect(Collectors.toMap(EthBlock.TransactionObject::getHash, e -> e));
+            Map<String, org.web3j.protocol.core.methods.response.TransactionReceipt> receipts = txObjects.values().stream()
+                    .map(tx -> web3JFacade.getReceipt(EthHash.of(tx.getHash())))
+                    .collect(Collectors.toMap(org.web3j.protocol.core.methods.response.TransactionReceipt::getTransactionHash, e -> e));
 
-        Map<String, org.web3j.protocol.core.methods.response.TransactionReceipt> receipts = txObjects.values().stream()
-                .map(tx -> web3JFacade.getReceipt(EthHash.of(tx.getHash())))
-                .collect(Collectors.toMap(org.web3j.protocol.core.methods.response.TransactionReceipt::getTransactionHash, e -> e));
+            List<TransactionReceipt> receiptList = receipts.entrySet().stream()
+                    .map(entry -> toReceipt(txObjects.get(entry.getKey()).getGas(), entry.getValue())).collect(Collectors.toList());
 
-        List<TransactionReceipt> receiptList = receipts.entrySet().stream()
-                .map(entry -> toReceipt(txObjects.get(entry.getKey()).getGas(), entry.getValue())).collect(Collectors.toList());
+            return new BlockInfo(block.getNumber().longValue(), receiptList);
+        } catch (Throwable ex) {
+            logger.error("error while converting to block info", ex);
+            throw new EthereumApiException("error while converting to block info", ex);
+        }
 
-        return new BlockInfo(block.getNumber().longValue(), receiptList);
     }
 
     private TransactionReceipt toReceipt(BigInteger gasLimit, org.web3j.protocol.core.methods.response.TransactionReceipt tx) {
