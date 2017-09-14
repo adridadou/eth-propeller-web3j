@@ -1,24 +1,39 @@
 package org.adridadou.ethereum.rpc;
 
-import org.adridadou.ethereum.propeller.Crypto;
-import org.adridadou.ethereum.propeller.EthereumBackend;
-import org.adridadou.ethereum.propeller.event.*;
-import org.adridadou.ethereum.propeller.exception.EthereumApiException;
-import org.adridadou.ethereum.propeller.values.*;
-import org.adridadou.ethereum.propeller.values.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.protocol.core.methods.request.RawTransaction;
-import org.web3j.protocol.core.methods.response.*;
-import org.web3j.utils.Numeric;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.adridadou.ethereum.propeller.Crypto;
+import org.adridadou.ethereum.propeller.EthereumBackend;
+import org.adridadou.ethereum.propeller.event.BlockInfo;
+import org.adridadou.ethereum.propeller.event.EthereumEventHandler;
+import org.adridadou.ethereum.propeller.exception.EthereumApiException;
+import org.adridadou.ethereum.propeller.values.ChainId;
+import org.adridadou.ethereum.propeller.values.EthAccount;
+import org.adridadou.ethereum.propeller.values.EthAddress;
+import org.adridadou.ethereum.propeller.values.EthData;
+import org.adridadou.ethereum.propeller.values.EthHash;
+import org.adridadou.ethereum.propeller.values.EthValue;
+import org.adridadou.ethereum.propeller.values.EventData;
+import org.adridadou.ethereum.propeller.values.GasPrice;
+import org.adridadou.ethereum.propeller.values.GasUsage;
+import org.adridadou.ethereum.propeller.values.Nonce;
+import org.adridadou.ethereum.propeller.values.SmartContractByteCode;
+import org.adridadou.ethereum.propeller.values.TransactionInfo;
+import org.adridadou.ethereum.propeller.values.TransactionReceipt;
+import org.adridadou.ethereum.propeller.values.TransactionRequest;
+import org.adridadou.ethereum.propeller.values.TransactionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.core.methods.request.RawTransaction;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.utils.Numeric;
 
 /**
  * Created by davidroon on 20.01.17.
@@ -119,7 +134,9 @@ public class EthereumRpc implements EthereumBackend {
                     .map(tx -> (EthBlock.TransactionObject)tx.get()).collect(Collectors.toMap(EthBlock.TransactionObject::getHash, e -> e));
 
             Map<String, org.web3j.protocol.core.methods.response.TransactionReceipt> receipts = txObjects.values().stream()
-                    .map(tx -> web3JFacade.getReceipt(EthHash.of(tx.getHash())))
+                    .map(tx -> Optional.ofNullable(web3JFacade.getReceipt(EthHash.of(tx.getHash()))))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(Collectors.toMap(org.web3j.protocol.core.methods.response.TransactionReceipt::getTransactionHash, e -> e));
 
             List<TransactionReceipt> receiptList = receipts.entrySet().stream()
