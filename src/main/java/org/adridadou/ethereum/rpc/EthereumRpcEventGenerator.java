@@ -32,7 +32,7 @@ public class EthereumRpcEventGenerator {
 
         ethereumEventHandlers
                 .forEach(handler -> param.receipts
-                        .stream().map(tx -> new TransactionInfo(tx.hash, tx, TransactionStatus.Executed))
+                        .stream().map(tx -> new TransactionInfo(tx.hash, tx, TransactionStatus.Executed, tx.blockHash))
                         .forEach(handler::onTransactionExecuted));
     }
 

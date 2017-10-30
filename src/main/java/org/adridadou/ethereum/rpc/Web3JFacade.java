@@ -3,6 +3,7 @@ package org.adridadou.ethereum.rpc;
 import java.io.IOError;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 
 import org.adridadou.ethereum.propeller.exception.EthereumApiException;
@@ -17,14 +18,16 @@ import org.adridadou.ethereum.propeller.values.Nonce;
 import org.adridadou.ethereum.propeller.values.SmartContractByteCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.*;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+
 import org.web3j.utils.Numeric;
+
 import rx.Observable;
 
 /**
@@ -81,7 +84,7 @@ public class Web3JFacade {
                         blockEventHandler.newElement(currentBlock);
                     }
                     Thread.sleep(pollingFrequence);
-                } catch (InterruptedException  | IOException e) {
+                } catch (Throwable e) {
                     logger.warn("error while polling blocks", e);
                 }
             }
@@ -165,17 +168,17 @@ public class Web3JFacade {
         }
     }
 
-    EthBlock getBlock(long blockNumber) {
+    Optional<EthBlock> getBlock(long blockNumber) {
         try {
-            return web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(BigInteger.valueOf(blockNumber)),true).send();
+            return Optional.ofNullable(web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(BigInteger.valueOf(blockNumber)),true).send());
         } catch (IOException e) {
             throw new EthereumApiException("error while retrieving the block " + blockNumber, e);
         }
     }
 
-    EthBlock getBlock(EthHash blockHash) {
+    Optional<EthBlock> getBlock(EthHash blockHash) {
         try {
-            return web3j.ethGetBlockByHash(blockHash.withLeading0x(),true).send();
+            return Optional.ofNullable(web3j.ethGetBlockByHash(blockHash.withLeading0x(),true).send());
         } catch (IOException e) {
             throw new EthereumApiException("error while retrieving the block " + blockHash.withLeading0x(), e);
         }
