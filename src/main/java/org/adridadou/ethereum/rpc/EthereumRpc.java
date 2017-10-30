@@ -29,8 +29,8 @@ import org.adridadou.ethereum.propeller.values.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
@@ -92,13 +92,13 @@ public class EthereumRpc implements EthereumBackend {
     }
 
     @Override
-    public BlockInfo getBlock(long number) {
-        return toBlockInfo(web3JFacade.getBlock(number));
+    public Optional<BlockInfo> getBlock(long number) {
+        return web3JFacade.getBlock(number).map(this::toBlockInfo);
     }
 
     @Override
-    public BlockInfo getBlock(EthHash ethHash) {
-        return toBlockInfo(web3JFacade.getBlock(ethHash));
+    public Optional<BlockInfo> getBlock(EthHash ethHash) {
+        return web3JFacade.getBlock(ethHash).map(this::toBlockInfo);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class EthereumRpc implements EthereumBackend {
             .map(transaction -> {
                 TransactionReceipt receipt = toReceipt(transaction.getGas(), web3jReceipt);
                 TransactionStatus status = transaction.getBlockHash().isEmpty() ? TransactionStatus.Unknown : TransactionStatus.Executed;
-                return new TransactionInfo(hash, receipt, status);
+                return new TransactionInfo(hash, receipt, status, EthHash.of(transaction.getBlockHash()));
             })
         );
     }
