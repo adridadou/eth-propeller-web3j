@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.adridadou</groupId>
             <artifactId>eth-propeller-core</artifactId>
-            <version>0.21</version>
+            <version>0.22</version>
         </dependency>
 
         <dependency>
