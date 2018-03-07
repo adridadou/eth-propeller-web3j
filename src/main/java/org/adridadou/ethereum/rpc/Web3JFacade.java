@@ -83,10 +83,10 @@ public class Web3JFacade {
                         this.lastBlockNumber = currentBlockNumber;
                         blockEventHandler.newElement(currentBlock);
                     }
-                    Thread.sleep(pollingFrequence);
                 } catch (Throwable e) {
                     logger.warn("error while polling blocks", e);
                 }
+                Thread.sleep(pollingFrequence);
             }
         });
         return blockEventHandler.observable;
