@@ -1,5 +1,6 @@
 package org.adridadou.ethereum.rpc;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,7 +10,6 @@ import org.adridadou.ethereum.propeller.Crypto;
 import org.adridadou.ethereum.propeller.EthereumBackend;
 import org.adridadou.ethereum.propeller.event.BlockInfo;
 import org.adridadou.ethereum.propeller.event.EthereumEventHandler;
-import org.adridadou.ethereum.propeller.exception.EthereumApiException;
 import org.adridadou.ethereum.propeller.values.ChainId;
 import org.adridadou.ethereum.propeller.values.EthAccount;
 import org.adridadou.ethereum.propeller.values.EthAddress;
@@ -145,7 +145,7 @@ public class EthereumRpc implements EthereumBackend {
             return new BlockInfo(block.getNumber().longValue(), receiptList);
         } catch (Throwable ex) {
             logger.error("error while converting to block info", ex);
-            throw new EthereumApiException("error while converting to block info", ex);
+            return new BlockInfo(block.getNumber().longValue(), Collections.emptyList());
         }
 
     }
